@@ -1,11 +1,13 @@
 package com.alan.finalAPIconsultorios.controller;
 
+import com.alan.finalAPIconsultorios.exception.ResourceNotFoundException;
 import com.alan.finalAPIconsultorios.models.SharedInfo;
 import com.alan.finalAPIconsultorios.serviceImpl.GenericServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class GenericControllerImpl<T extends SharedInfo, S extends GenericServiceImpl<T,Long>> implements GenericController<T, Long> {
@@ -29,13 +31,16 @@ public abstract class GenericControllerImpl<T extends SharedInfo, S extends Gene
     }
 
     @PutMapping("/{id}")
-    public CompletableFuture<ResponseEntity> update(@RequestBody T entityModel, Long id){
+    public CompletableFuture<ResponseEntity> update(@RequestBody T entityModel,@PathVariable Long id){
 
         return servicio.update(entityModel, id).thenApply(ResponseEntity::ok);
     }
 
     @DeleteMapping("/{id}")
     public CompletableFuture<ResponseEntity> delete(@PathVariable Long id){
+        if(servicio.getById(id)==null){
+            return CompletableFuture.completedFuture(new ResourceNotFoundException("User","Id",id)).thenApply(ResponseEntity::ok);
+        }
         return servicio.delete(id).thenApply(ResponseEntity::ok);
     }
 }

@@ -1,32 +1,44 @@
 package com.alan.finalAPIconsultorios.models;
 
+
+import com.sun.istack.NotNull;
+import lombok.Builder;
+import javax.validation.constraints.NotEmpty;
+
+
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(name = "users")
+@Builder
 public class User extends SharedInfo{
-
 
     @Column(name="Status")
     private Integer status;
 
     @Column(name="Name")
+    @NotEmpty(message = "Name should not be empty")
     private String name;
 
     @Column(name="Lastname")
+    @NotEmpty(message = "Lastname should not be empty")
     private String lastName;
 
     @Column(name="Surname")
+    @NotEmpty(message = "Surname should not be empty")
     private String surname;
 
     @Column(name="Email")
+    @NotEmpty(message = "Email should not be empty")
     private String email;
 
     @Column(name="Role")
+    //@NotEmpty(message = "Role should not be empty")
     private Integer role;
 
     @Column(name="Username")
+    @NotEmpty(message = "Username should not be empty")
     private String username;
 
 
@@ -98,6 +110,5 @@ public class User extends SharedInfo{
     public void setUsername(String username) {
         this.username = username;
     }
-
 
 }

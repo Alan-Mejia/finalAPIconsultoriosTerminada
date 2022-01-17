@@ -7,12 +7,15 @@ import com.alan.finalAPIconsultorios.models.User;
 import com.alan.finalAPIconsultorios.respository.GenericRepository;
 import com.alan.finalAPIconsultorios.respository.UserRepository;
 import com.alan.finalAPIconsultorios.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,10 +46,40 @@ public class UserServiceImpl extends GenericServiceImpl<User,Long> implements Us
 
     @Async("asyncExecutor")
     @Transactional
-    public CompletableFuture<User> getOneUserDTO(Long id){
-        System.out.println(Thread.currentThread().getName());
-        return CompletableFuture.completedFuture(genericRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Entity", "Id", id)));
+    public CompletableFuture<SimpleUserDTO> getOneUserDTO(Long id){
+        User existingUser = userRepository.getById(id);
+        ModelMapper modelMapper = new ModelMapper();
+        SimpleUserDTO userDTO = modelMapper.map(existingUser,SimpleUserDTO.class);
+       return CompletableFuture.completedFuture(userDTO);
     }
 
+    @Async("asyncExecutor")
+    @Transactional
+    public CompletableFuture<User> updateUser(User user,Long id){
+        User existingUser = userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User","Id",id));
+        /*------------Not Modifiable------------------------*/
+        existingUser.setModificationTime(new Date());
+        existingUser.setCreationTime(new Date());
+
+        /*-----------Modifiable--------------*/
+        existingUser.setRole(user.getRole());
+        existingUser.setName(user.getName());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setPassword(user.getPassword());
+        existingUser.setLastName(user.getLastName());
+        existingUser.setSurname(user.getSurname());
+        existingUser.setUserModifier(user.getUserModifier());
+
+        return CompletableFuture.completedFuture(userRepository.save(existingUser));
+    }
+
+
+    @Async("asyncExecutor")
+    @Transactional
+    public CompletableFuture<Boolean> deleteUser(Long id){
+        User existingUser = userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User","Id",id));
+        existingUser.setStatus(2);
+        return CompletableFuture.completedFuture(true);
+    }
 
 }
